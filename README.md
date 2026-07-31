@@ -584,6 +584,80 @@ curl -X POST http://localhost:4000/api/fare/quote-custom \
 You should get back the graceful "not available yet" message rather than
 an error.
 
+## Visual Design Overhaul
+
+A full design pass on the frontend, grounded in the actual subject matter
+(India's highway network) rather than generic travel-site or SaaS
+defaults. Verified with a real `npm run build` (isolating the one step —
+Google Fonts fetching — that only fails in my sandbox's restricted
+network, not on a real machine or on Vercel).
+
+**Design system:**
+- **Color** — deep highway-signage green (`#1F4A38`) as primary, a muted
+  brick-sandstone red (`#B14A2A`) as a sparing secondary, marigold-mustard
+  (`#D9A234`) for calls to action, and a pale sage-stone background —
+  deliberately not navy-SaaS-blue or the cream+terracotta combination that
+  reads as AI-generated-by-default
+- **Type** — three Google Fonts, each with a specific job: **Big Shoulders
+  Display** (modeled on city/highway signage lettering) for headlines,
+  **Public Sans** (built for civic/road-sign legibility) for body text,
+  **IBM Plex Mono** for every fare, distance, and date — a deliberate
+  "digital odometer" treatment for numeric data. Loaded via `next/font/google`
+  for performance (self-hosted at build time, no render-blocking request).
+- **Signature element** — a hand-drawn dashed "route line" (`RouteDivider.js`)
+  that draws itself in on scroll, standing in for plain section dividers.
+  It's not decorative — the product being sold is literally priced routes
+  between places, so the line makes that visible.
+- **Hero** — `RouteMapHero.js` replaces a generic banner image with an
+  illustrated, animated map of a real seeded route (Delhi → Chandigarh →
+  Shimla → Manali) drawing itself in on page load, with the actual 540 km
+  distance shown as a milestone tag.
+- **Landmark icons** — `LandmarkIcons.js` are hand-drawn line-art icons
+  (Taj Mahal, a palace facade, hill-station mountains, a temple dome, river
+  ghats, a monument gate) used on route/package cards instead of stock
+  photography. This was a deliberate choice, not a shortcut: hotlinking
+  photos found via search would mean embedding third-party-hosted images
+  with no license clearance into your commercial site — a real risk. The
+  line-art also ties visually back to the route-line signature.
+- **Motion** — Framer Motion powers one orchestrated hero sequence (route
+  drawing in, waypoints appearing in order) plus restrained scroll-reveals
+  on cards and the process section. `prefers-reduced-motion` is respected
+  globally.
+- **"How It Works"** — now genuinely justified as a numbered sequence
+  (search → book → travel really is an ordered process), styled as
+  kilometer-stone markers rather than generic numbered cards.
+- **New homepage section**: Tour Packages are now featured on the
+  homepage itself (previously only reachable via the nav), each package
+  displayed on the homepage now.
+
+**What changed under the hood:**
+- All color CSS variables were renamed from `--color-navy`/`--color-gold`
+  to `--color-primary`/`--color-accent` (an AI-tell-adjacent name for what
+  is now a green, cleaned up project-wide)
+- `framer-motion` added as a dependency
+- Fixed a leftover `routemitra.example` placeholder email in the footer
+  from before the Roaming Route rebrand
+
+## Applying This Update
+
+This pass touched nearly every frontend file, so it's packaged as a full
+replacement of the `frontend/` folder rather than a file-by-file delta.
+
+1. **Back up your `.env.local`** (or just note its contents) — it's inside
+   `frontend/`, so don't lose it.
+2. Delete your existing `frontend/` folder entirely, replace it with the
+   one from `frontend-design-overhaul.zip`.
+3. Restore your `.env.local` (or recreate it from `.env.local.example`).
+4. `npm install` (pulls in `framer-motion`)
+5. `npm run dev`
+
+Since font loading happens at build time and needs internet access (which
+my sandbox doesn't have but your machine does), this is one part you'll
+be verifying for the first time — if `npm run build` or `npm run dev`
+throws a font-fetch error, it very likely means your machine itself is
+offline or behind a restrictive proxy at that moment; retry once you have
+a normal connection.
+
 ## Next Step
 
 Every module from the original roadmap is now built. From here, natural

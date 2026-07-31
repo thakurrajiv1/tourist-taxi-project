@@ -1,16 +1,23 @@
+import RouteDivider from './RouteDivider';
+
 export default function Footer() {
   return (
     <footer
       style={{
-        background: 'var(--color-navy-dark)',
-        color: '#b7c3d6',
+        background: 'var(--color-primary-dark)',
+        color: '#b7c8bb',
         marginTop: 64,
       }}
     >
+      <div style={{ padding: '0 20px' }}>
+        <div className="container" style={{ padding: 0 }}>
+          <RouteDivider color="rgba(255,255,255,0.18)" />
+        </div>
+      </div>
       <div
         className="container"
         style={{
-          padding: '32px 20px',
+          padding: '28px 20px 32px',
           display: 'flex',
           flexWrap: 'wrap',
           gap: 24,
@@ -19,8 +26,10 @@ export default function Footer() {
         }}
       >
         <div>
-          <div style={{ color: 'white', fontWeight: 700, marginBottom: 6 }}>Roaming Route</div>
-          <div>Outstation taxi & tour bookings across India.</div>
+          <div className="signage" style={{ color: 'white', fontWeight: 700, marginBottom: 6, fontFamily: 'var(--font-display)', fontSize: 17 }}>
+            Roaming Route
+          </div>
+          <div>Outstation taxi &amp; tour bookings across North India.</div>
         </div>
         <div>
           <div style={{ color: 'white', fontWeight: 600, marginBottom: 6 }}>Popular Routes</div>
@@ -28,8 +37,8 @@ export default function Footer() {
         </div>
         <div>
           <div style={{ color: 'white', fontWeight: 600, marginBottom: 6 }}>Contact</div>
-          <div>+91 00000 00000</div>
-          <div>support@routemitra.example</div>
+          <div className="mono">+91 00000 00000</div>
+          <div className="mono">support@roamingroute.example</div>
         </div>
       </div>
       <div

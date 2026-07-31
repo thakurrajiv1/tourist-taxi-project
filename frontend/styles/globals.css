@@ -1,17 +1,22 @@
 :root {
-  --color-navy: #0f2c52;
-  --color-navy-dark: #0a1e38;
-  --color-gold: #e8a33d;
-  --color-gold-dark: #c8842a;
-  --color-bg: #f7f8fa;
+  /* Color — deep highway-signage green, brick sandstone, marigold accent,
+     sage-stone paper. Deliberately not navy-SaaS-blue or cream+terracotta. */
+  --color-primary: #1f4a38;
+  --color-primary-dark: #12291f;
+  --color-sandstone: #b14a2a;
+  --color-accent: #d9a234;
+  --color-accent-dark: #b9861f;
+  --color-bg: #eff1ea;
   --color-white: #ffffff;
-  --color-text: #1f2937;
-  --color-text-muted: #6b7280;
-  --color-border: #e5e7eb;
+  --color-text: #16241d;
+  --color-text-muted: #52655b;
+  --color-border: #dcded2;
   --color-success: #1a7f4e;
   --color-error: #b3261e;
   --radius: 10px;
-  --shadow: 0 2px 10px rgba(15, 44, 82, 0.08);
+  --radius-lg: 16px;
+  --shadow: 0 2px 10px rgba(18, 41, 31, 0.08);
+  --shadow-lift: 0 16px 32px rgba(18, 41, 31, 0.16);
 }
 
 * {
@@ -24,8 +29,8 @@ body {
   margin: 0;
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
   line-height: 1.5;
 }
 
@@ -35,13 +40,41 @@ a {
 }
 
 h1, h2, h3, h4 {
-  color: var(--color-navy);
-  line-height: 1.25;
-  margin: 0 0 0.5em 0;
+  font-family: var(--font-display), "Arial Narrow", sans-serif;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.4em 0;
+}
+
+h1 { font-size: clamp(2.4rem, 5vw, 4rem); font-weight: 800; }
+h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); }
+h3 { font-size: 1.15rem; letter-spacing: 0; }
+
+/* Signage treatment — opt-in, used for marketing section titles only.
+   Admin screens and content titles (package names, itinerary days) stay
+   in normal case; shouting at people managing bookings isn't the goal. */
+.signage {
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.eyebrow {
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent-dark);
+}
+
+.mono {
+  font-family: var(--font-mono), monospace;
 }
 
 .container {
-  max-width: 1100px;
+  max-width: 1140px;
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -54,6 +87,7 @@ h1, h2, h3, h4 {
   border: none;
   border-radius: var(--radius);
   padding: 12px 22px;
+  font-family: var(--font-body), sans-serif;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -65,26 +99,26 @@ h1, h2, h3, h4 {
 }
 
 .btn-primary {
-  background: var(--color-gold);
-  color: var(--color-navy-dark);
+  background: var(--color-accent);
+  color: var(--color-primary-dark);
 }
 
 .btn-primary:hover {
-  background: var(--color-gold-dark);
+  background: var(--color-accent-dark);
 }
 
 .btn-primary:disabled {
-  background: #e5c68f;
+  background: #e9d4a0;
   cursor: not-allowed;
 }
 
 .btn-secondary {
-  background: var(--color-navy);
+  background: var(--color-primary);
   color: var(--color-white);
 }
 
 .btn-secondary:hover {
-  background: var(--color-navy-dark);
+  background: var(--color-primary-dark);
 }
 
 .btn-block {
@@ -93,7 +127,7 @@ h1, h2, h3, h4 {
 
 .card {
   background: var(--color-white);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
   padding: 24px;
 }
@@ -117,14 +151,16 @@ h1, h2, h3, h4 {
   border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 15px;
+  font-family: var(--font-body), sans-serif;
   background: var(--color-white);
   color: var(--color-text);
 }
 
 .field input:focus,
 .field select:focus {
-  outline: none;
-  border-color: var(--color-navy);
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
 }
 
 .error-banner {
@@ -149,10 +185,20 @@ h1, h2, h3, h4 {
 
 .badge {
   display: inline-block;
+  font-family: var(--font-mono), monospace;
   font-size: 12px;
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(15, 44, 82, 0.08);
-  color: var(--color-navy);
+  background: rgba(31, 74, 56, 0.08);
+  color: var(--color-primary);
+}
+
+/* Respect reduced-motion preference everywhere */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

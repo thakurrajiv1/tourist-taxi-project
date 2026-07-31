@@ -18,7 +18,7 @@ export default function PackagesPage({ packages }) {
       description="Multi-day tour packages across India — Golden Triangle, hill stations, and more, with a full day-by-day itinerary and one fixed price."
     >
       <div className="container" style={{ paddingTop: 40 }}>
-        <h1>Tour Packages</h1>
+        <h1 className="signage">Tour Packages</h1>
         <p style={{ color: 'var(--color-text-muted)', maxWidth: 600 }}>
           Multi-day trips with a complete day-by-day itinerary and one fixed price — no
           per-day fare guesswork.
@@ -56,7 +56,7 @@ export default function PackagesPage({ packages }) {
                   {pkg.description}
                 </p>
               )}
-              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-navy)', marginTop: 8 }}>
+              <div className="mono" style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-primary)', marginTop: 8 }}>
                 ₹{parseFloat(pkg.price).toLocaleString('en-IN')}
               </div>
             </Link>

@@ -39,7 +39,7 @@ export default function RoutePage({ route }) {
     >
       <div className="container" style={{ paddingTop: 40, maxWidth: 700 }}>
         <span className="badge">{tripTypeLabel}</span>
-        <h1 style={{ marginTop: 12 }}>
+        <h1 className="signage" style={{ marginTop: 12 }}>
           {route.from_city_name} to {route.to_city_name} Taxi
         </h1>
         <p style={{ color: 'var(--color-text-muted)' }}>
@@ -52,12 +52,12 @@ export default function RoutePage({ route }) {
         <div className="card" style={{ marginTop: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>Fixed Price</div>
-              <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--color-navy)' }}>
+              <div className="eyebrow" style={{ marginBottom: 4 }}>Fixed Price</div>
+              <div className="mono" style={{ fontSize: 32, fontWeight: 700, color: 'var(--color-primary)' }}>
                 ₹{parseFloat(route.fixed_price).toLocaleString('en-IN')}
               </div>
             </div>
-            {route.distance_km && <span className="badge">{Math.round(route.distance_km)} km</span>}
+            {route.distance_km && <span className="badge">{Math.round(route.distance_km)} KM</span>}
           </div>
 
           <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginTop: 12 }}>
@@ -71,7 +71,7 @@ export default function RoutePage({ route }) {
         </div>
 
         <div style={{ marginTop: 40 }}>
-          <h2 style={{ fontSize: 20 }}>Why Book With Us</h2>
+          <h2 className="signage" style={{ fontSize: 20 }}>Why Book With Us</h2>
           <ul style={{ color: 'var(--color-text-muted)', fontSize: 14, lineHeight: 1.9 }}>
             <li>Upfront, fixed pricing for this route — no meter surprises</li>
             <li>Verified drivers and well-maintained vehicles</li>

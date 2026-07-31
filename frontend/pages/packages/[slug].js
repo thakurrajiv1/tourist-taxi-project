@@ -23,7 +23,7 @@ export default function PackageDetailPage({ pkg }) {
     >
       <div className="container" style={{ paddingTop: 40, maxWidth: 760 }}>
         <span className="badge">{pkg.duration_days} Days</span>
-        <h1 style={{ marginTop: 12 }}>{pkg.title}</h1>
+        <h1 className="signage" style={{ marginTop: 12 }}>{pkg.title}</h1>
         {pkg.description && (
           <p style={{ color: 'var(--color-text-muted)' }}>{pkg.description}</p>
         )}
@@ -31,8 +31,8 @@ export default function PackageDetailPage({ pkg }) {
         <div className="card" style={{ marginTop: 20, marginBottom: 32 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>Package Price</div>
-              <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--color-navy)' }}>
+              <div className="eyebrow" style={{ marginBottom: 4 }}>Package Price</div>
+              <div className="mono" style={{ fontSize: 32, fontWeight: 700, color: 'var(--color-primary)' }}>
                 ₹{parseFloat(pkg.price).toLocaleString('en-IN')}
               </div>
             </div>
@@ -49,7 +49,7 @@ export default function PackageDetailPage({ pkg }) {
 
         {pkg.itinerary && pkg.itinerary.length > 0 && (
           <section style={{ marginBottom: 32 }}>
-            <h2 style={{ fontSize: 20 }}>Day-by-Day Itinerary</h2>
+            <h2 className="signage" style={{ fontSize: 20 }}>Day-by-Day Itinerary</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
               {pkg.itinerary.map((day) => (
                 <div key={day.day_number} className="card">

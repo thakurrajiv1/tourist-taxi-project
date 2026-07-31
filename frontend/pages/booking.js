@@ -171,7 +171,7 @@ export default function BookingPage() {
   return (
     <Layout title="Complete Your Booking">
       <div className="container" style={{ paddingTop: 40, maxWidth: 560 }}>
-        <h1 style={{ fontSize: 26 }}>Complete Your Booking</h1>
+        <h1 className="signage" style={{ fontSize: 26 }}>Complete Your Booking</h1>
 
         {isCustom && quote && (quote.from_resolved || quote.to_resolved) && (
           <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginTop: -8, marginBottom: 12 }}>
@@ -183,7 +183,7 @@ export default function BookingPage() {
         {quote && (
           <div className="card" style={{ marginBottom: 20 }}>
             <div style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>Fare</div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--color-navy)' }}>
+            <div className="mono" style={{ fontSize: 28, fontWeight: 700, color: 'var(--color-primary)' }}>
               ₹{quote.fare.toLocaleString('en-IN')}
             </div>
           </div>

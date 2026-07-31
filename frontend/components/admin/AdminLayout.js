@@ -31,7 +31,7 @@ export default function AdminLayout({ title, children }) {
         <aside
           style={{
             width: 220,
-            background: 'var(--color-navy-dark)',
+            background: 'var(--color-primary-dark)',
             color: 'white',
             padding: '24px 16px',
             flexShrink: 0,

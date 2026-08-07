@@ -658,6 +658,54 @@ throws a font-fetch error, it very likely means your machine itself is
 offline or behind a restrictive proxy at that moment; retry once you have
 a normal connection.
 
+## Find Us Section — Map, Reviews, Instagram
+
+Three things, each handled the right way for what it needs:
+
+- **Google Maps embed** — works today, zero setup. Just a URL query, no
+  API key. Set your real address in `NEXT_PUBLIC_GOOGLE_MAPS_QUERY`.
+- **Instagram follow button** — works today, just a link. Set your real
+  profile in `NEXT_PUBLIC_INSTAGRAM_URL`. (An embedded live feed would
+  need a paid third-party service in 2026 — a well-designed link-out is
+  the better trade for now.)
+- **Google Reviews** — built dormant, same pattern as Razorpay (Module 4)
+  and Mapbox (custom locations). Inline star ratings and review snippets
+  need the Google Places API, which requires a billing-enabled Google
+  Cloud project. Until that's connected, the site shows an honest empty
+  state (no fabricated testimonials) plus a **"Read Reviews on Google"**
+  button that works immediately via `NEXT_PUBLIC_GOOGLE_REVIEWS_URL`.
+
+**To go live with inline reviews later:**
+1. Set up a Google Cloud project, enable the Places API, enable billing
+2. Find your Place ID: search your business at
+   [Place ID Finder](https://developers.google.com/maps/documentation/places/web-service/place-id)
+3. Add to `backend/.env`: `GOOGLE_PLACES_API_KEY=...` and `GOOGLE_PLACE_ID=...`
+4. Restart the backend — activates automatically, no code changes
+
+**New backend endpoint:** `GET /api/reviews` — public, returns
+`{ reviews_enabled: false, message }` when not configured, or
+`{ reviews_enabled: true, rating, total_ratings, reviews }` once it is.
+
+## Images — Tour Packages, Homepage Showcase
+
+Full guide at `IMAGES.md` in the project root. Short version: images live
+locally in `frontend/public/images/` (served by Vercel's own CDN — no
+separate image-hosting account needed), sourced from Unsplash/Pexels
+(genuinely free for commercial use), never hotlinked from search results
+(that's someone else's hosted content with no license clearance).
+
+- **Tour packages**: add a photo to `frontend/public/images/packages/`,
+  reference it via the existing **Cover Image URL** field in
+  `/admin/tour-packages` as `/images/packages/your-file.jpg`. Shows an
+  on-brand placeholder graphic until you do.
+- **Homepage photo showcase**: save a photo as exactly
+  `frontend/public/images/hero/showcase.jpg` — no admin step needed, it's
+  a single fixed section. Shows an on-brand gradient placeholder until
+  the file exists.
+- **The illustrated hero** (`RouteMapHero.js`) is separate — hand-drawn
+  SVG, not a photo, per the "keep the illustration, add a photo section
+  elsewhere" decision.
+
 ## Next Step
 
 Every module from the original roadmap is now built. From here, natural

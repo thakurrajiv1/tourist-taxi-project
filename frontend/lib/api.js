@@ -39,4 +39,6 @@ export const createEnquiry = (payload) =>
 export const getTourPackages = () => apiFetch('/api/tour-packages');
 export const getTourPackageBySlug = (slug) => apiFetch(`/api/tour-packages/${slug}`);
 
+export const getBusinessReviews = () => apiFetch('/api/reviews');
+
 export default apiFetch;

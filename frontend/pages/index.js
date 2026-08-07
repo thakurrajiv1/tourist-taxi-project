@@ -7,7 +7,10 @@ import SearchForm from '../components/SearchForm';
 import FareQuoteCard from '../components/FareQuoteCard';
 import RouteMapHero from '../components/RouteMapHero';
 import RouteDivider from '../components/RouteDivider';
+import DestinationsSection from '../components/DestinationsSection';
+import FindUsSection from '../components/FindUsSection';
 import { getLandmarkIcon } from '../components/LandmarkIcons';
+import { getAvailableDestinationImages } from '../lib/destinationImages';
 import {
   getCities,
   getVehicleTypes,
@@ -15,21 +18,32 @@ import {
   getFareQuote,
   getCustomFareQuote,
   getTourPackages,
+  getBusinessReviews,
 } from '../lib/api';
 
 export async function getServerSideProps() {
+  const destinations = getAvailableDestinationImages();
+
   try {
-    const [cities, vehicleTypes, tripRoutes, tourPackages] = await Promise.all([
+    const [cities, vehicleTypes, tripRoutes, tourPackages, reviews] = await Promise.all([
       getCities(),
       getVehicleTypes(),
       getTripRoutes(),
       getTourPackages(),
+      getBusinessReviews().catch(() => ({ reviews_enabled: false })),
     ]);
-    return { props: { cities, vehicleTypes, tripRoutes, tourPackages } };
+    return { props: { cities, vehicleTypes, tripRoutes, tourPackages, reviews, destinations } };
   } catch (err) {
-    // If the API is unreachable, still render the page instead of crashing —
-    // the search form will just have empty dropdowns until the backend is up.
-    return { props: { cities: [], vehicleTypes: [], tripRoutes: [], tourPackages: [] } };
+    return {
+      props: {
+        cities: [],
+        vehicleTypes: [],
+        tripRoutes: [],
+        tourPackages: [],
+        reviews: { reviews_enabled: false },
+        destinations,
+      },
+    };
   }
 }
 
@@ -38,7 +52,7 @@ const fadeUp = {
   show: { opacity: 1, y: 0 },
 };
 
-export default function HomePage({ cities, vehicleTypes, tripRoutes, tourPackages }) {
+export default function HomePage({ cities, vehicleTypes, tripRoutes, tourPackages, reviews, destinations }) {
   const router = useRouter();
   const [quote, setQuote] = useState(null);
   const [lastSearch, setLastSearch] = useState(null);
@@ -76,9 +90,34 @@ export default function HomePage({ cities, vehicleTypes, tripRoutes, tourPackage
     router.push(`/booking?${query}`);
   }
 
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com';
+  const businessAddress = process.env.NEXT_PUBLIC_BUSINESS_ADDRESS || '';
+
+  const localBusinessSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'TaxiService',
+    name: 'Roaming Route Travel and Transport',
+    url: SITE_URL,
+    ...(businessAddress ? { address: businessAddress } : {}),
+    areaServed: tripRoutes
+      .map((r) => r.to_city_name)
+      .filter((v, i, arr) => v && arr.indexOf(v) === i),
+    ...(reviews && reviews.reviews_enabled
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: reviews.rating,
+            reviewCount: reviews.total_reviews,
+          },
+        }
+      : {}),
+  };
+
   return (
-    <Layout>
-      {/* Hero — the route map IS the thesis, not a stock photo */}
+    <Layout
+      structuredData={localBusinessSchema}
+      description="Book outstation taxis, round trips, and multi-day tour packages across North India. Fixed upfront pricing, verified drivers — Delhi, Agra, Jaipur, Manali, Shimla, and more."
+    >
       <section
         style={{
           background: 'linear-gradient(165deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
@@ -125,7 +164,6 @@ export default function HomePage({ cities, vehicleTypes, tripRoutes, tourPackage
         </div>
       </section>
 
-      {/* Search card, overlapping the hero */}
       <div className="container" style={{ marginTop: -64, position: 'relative', zIndex: 2 }}>
         <SearchForm
           cities={cities}
@@ -137,7 +175,6 @@ export default function HomePage({ cities, vehicleTypes, tripRoutes, tourPackage
         <FareQuoteCard quote={quote} onBookNow={handleBookNow} />
       </div>
 
-      {/* Popular routes - SEO content */}
       {tripRoutes.length > 0 && (
         <section className="container" style={{ marginTop: 72 }}>
           <div className="eyebrow" style={{ marginBottom: 6 }}>Fixed-Price Routes</div>
@@ -202,7 +239,8 @@ export default function HomePage({ cities, vehicleTypes, tripRoutes, tourPackage
         <RouteDivider />
       </div>
 
-      {/* Featured tour packages */}
+      <DestinationsSection destinations={destinations} />
+
       {tourPackages.length > 0 && (
         <section className="container" style={{ marginTop: 40 }}>
           <div className="eyebrow" style={{ marginBottom: 6 }}>Multi-Day Circuits</div>
@@ -259,7 +297,6 @@ export default function HomePage({ cities, vehicleTypes, tripRoutes, tourPackage
         </section>
       )}
 
-      {/* How it works — a genuine 3-step sequence, styled as kilometer-stone markers */}
       <section className="container" style={{ marginTop: 72, marginBottom: 56 }}>
         <div className="eyebrow" style={{ marginBottom: 6 }}>The Process</div>
         <h2 className="signage">How It Works</h2>
@@ -310,6 +347,8 @@ export default function HomePage({ cities, vehicleTypes, tripRoutes, tourPackage
           ))}
         </div>
       </section>
+
+      <FindUsSection reviews={reviews} />
     </Layout>
   );
 }

@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import Layout from '../../components/Layout';
+import { MountainIcon } from '../../components/LandmarkIcons';
 import { getTourPackages } from '../../lib/api';
 
 export async function getServerSideProps() {
@@ -39,7 +41,42 @@ export default function PackagesPage({ packages }) {
           }}
         >
           {packages.map((pkg) => (
-            <Link key={pkg.id} href={`/packages/${pkg.slug}`} className="card" style={{ display: 'block' }}>
+            <Link key={pkg.id} href={`/packages/${pkg.slug}`} className="card" style={{ display: 'block', padding: 16 }}>
+              {pkg.cover_image_url ? (
+                <div
+                  style={{
+                    position: 'relative',
+                    aspectRatio: '16 / 10',
+                    borderRadius: 10,
+                    overflow: 'hidden',
+                    marginBottom: 12,
+                  }}
+                >
+                  <Image
+                    src={pkg.cover_image_url}
+                    alt={pkg.title}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    sizes="(max-width: 768px) 100vw, 25vw"
+                  />
+                </div>
+              ) : (
+                <div
+                  style={{
+                    aspectRatio: '16 / 10',
+                    borderRadius: 10,
+                    background: 'var(--color-bg)',
+                    border: '1.5px dashed var(--color-border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                    color: 'var(--color-text-muted)',
+                  }}
+                >
+                  <MountainIcon />
+                </div>
+              )}
               <span className="badge">{pkg.duration_days} Days</span>
               <h3 style={{ fontSize: 18, marginTop: 10 }}>{pkg.title}</h3>
               {pkg.description && (

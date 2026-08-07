@@ -5,11 +5,7 @@ export async function getServerSideProps({ params }) {
   try {
     const routes = await getTripRoutes();
     const route = routes.find((r) => r.seo_slug === params.slug);
-
-    if (!route) {
-      return { notFound: true };
-    }
-
+    if (!route) return { notFound: true };
     return { props: { route } };
   } catch (err) {
     return { notFound: true };
@@ -19,11 +15,7 @@ export async function getServerSideProps({ params }) {
 export default function RoutePage({ route }) {
   const title = `${route.from_city_name} to ${route.to_city_name} Taxi`;
   const tripTypeLabel =
-    route.trip_type === 'one_way'
-      ? 'One Way'
-      : route.trip_type === 'round_trip'
-      ? 'Round Trip'
-      : 'Local / Full Day';
+    route.trip_type === 'one_way' ? 'One Way' : route.trip_type === 'round_trip' ? 'Round Trip' : 'Local / Full Day';
 
   const bookingQuery = new URLSearchParams({
     from_city_id: route.from_city_id,
@@ -32,11 +24,28 @@ export default function RoutePage({ route }) {
     trip_type: route.trip_type,
   }).toString();
 
+  const description = `Book a ${route.vehicle_type_name} for ${tripTypeLabel.toLowerCase()} travel from ${route.from_city_name} to ${route.to_city_name}. Upfront pricing, verified drivers.`;
+
+  // Service + Offer schema — the specific, priced thing being sold on
+  // this page, which is what a search engine actually wants to index for
+  // a query like "delhi to manali taxi price".
+  const serviceSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    serviceType: 'Taxi Service',
+    name: title,
+    description,
+    provider: { '@type': 'TaxiService', name: 'Roaming Route Travel and Transport' },
+    areaServed: [route.from_city_name, route.to_city_name],
+    offers: {
+      '@type': 'Offer',
+      price: parseFloat(route.fixed_price),
+      priceCurrency: 'INR',
+    },
+  };
+
   return (
-    <Layout
-      title={title}
-      description={`Book a ${route.vehicle_type_name} for ${tripTypeLabel.toLowerCase()} travel from ${route.from_city_name} to ${route.to_city_name}. Upfront pricing, verified drivers.`}
-    >
+    <Layout title={title} description={description} structuredData={serviceSchema}>
       <div className="container" style={{ paddingTop: 40, maxWidth: 700 }}>
         <span className="badge">{tripTypeLabel}</span>
         <h1 className="signage" style={{ marginTop: 12 }}>

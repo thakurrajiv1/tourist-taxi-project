@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Layout from '../../components/Layout';
 import { getTourPackageBySlug } from '../../lib/api';
 import { buildWhatsAppLink } from '../../lib/whatsapp';
@@ -15,13 +16,56 @@ export default function PackageDetailPage({ pkg }) {
   if (!pkg) return null;
 
   const whatsappMessage = `Hi, I'm interested in the "${pkg.title}" tour package.`;
+  const description = pkg.description || `${pkg.duration_days}-day tour package — ${pkg.title}`;
+
+  const tripSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'TouristTrip',
+    name: pkg.title,
+    description,
+    ...(pkg.cover_image_url ? { image: pkg.cover_image_url } : {}),
+    provider: { '@type': 'TravelAgency', name: 'Roaming Route Travel and Transport' },
+    offers: {
+      '@type': 'Offer',
+      price: parseFloat(pkg.price),
+      priceCurrency: 'INR',
+    },
+    itinerary: (pkg.itinerary || []).map((day) => ({
+      '@type': 'TouristAttraction',
+      name: day.title || `Day ${day.day_number}`,
+      description: day.description || undefined,
+    })),
+  };
 
   return (
     <Layout
       title={pkg.title}
-      description={pkg.description || `${pkg.duration_days}-day tour package — ${pkg.title}`}
+      description={description}
+      ogImage={pkg.cover_image_url}
+      structuredData={tripSchema}
     >
       <div className="container" style={{ paddingTop: 40, maxWidth: 760 }}>
+        {pkg.cover_image_url && (
+          <div
+            style={{
+              position: 'relative',
+              width: '100%',
+              aspectRatio: '16 / 7',
+              borderRadius: 'var(--radius-lg)',
+              overflow: 'hidden',
+              marginBottom: 20,
+            }}
+          >
+            <Image
+              src={pkg.cover_image_url}
+              alt={pkg.title}
+              fill
+              style={{ objectFit: 'cover' }}
+              sizes="(max-width: 768px) 100vw, 760px"
+              priority
+            />
+          </div>
+        )}
         <span className="badge">{pkg.duration_days} Days</span>
         <h1 className="signage" style={{ marginTop: 12 }}>{pkg.title}</h1>
         {pkg.description && (

@@ -37,8 +37,8 @@ export default function Footer() {
         </div>
         <div>
           <div style={{ color: 'white', fontWeight: 600, marginBottom: 6 }}>Contact</div>
-          <div className="mono">+91 00000 00000</div>
-          <div className="mono">support@roamingroute.example</div>
+          <div className="mono">+91 7018265332</div>
+          <div className="mono">contactus@roamingroute.in</div>
         </div>
       </div>
       <div

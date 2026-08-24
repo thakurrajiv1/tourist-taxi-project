@@ -16,22 +16,14 @@ async function getAllDistances(req, res) {
   }
 }
 
-/**
- * Upserts a distance for a from/to pair. Only sets that one direction —
- * the admin form asks separately whether to also save the reverse
- * direction, since road distance is normally the same either way but
- * isn't forced to be.
- */
 async function upsertDistance(req, res) {
   const { from_city_id, to_city_id, distance_km, duration_minutes, also_reverse } = req.body;
-
   if (!from_city_id || !to_city_id || !distance_km) {
     return res.status(400).json({ error: 'from_city_id, to_city_id, and distance_km are required' });
   }
   if (from_city_id === to_city_id) {
     return res.status(400).json({ error: 'from_city_id and to_city_id cannot be the same' });
   }
-
   try {
     const result = await pool.query(
       `INSERT INTO city_distances (from_city_id, to_city_id, distance_km, duration_minutes)
@@ -41,7 +33,6 @@ async function upsertDistance(req, res) {
        RETURNING *`,
       [from_city_id, to_city_id, distance_km, duration_minutes || null]
     );
-
     if (also_reverse) {
       await pool.query(
         `INSERT INTO city_distances (from_city_id, to_city_id, distance_km, duration_minutes)
@@ -51,7 +42,6 @@ async function upsertDistance(req, res) {
         [to_city_id, from_city_id, distance_km, duration_minutes || null]
       );
     }
-
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error(err);
@@ -59,4 +49,17 @@ async function upsertDistance(req, res) {
   }
 }
 
-module.exports = { getAllDistances, upsertDistance };
+// Hard delete is safe here — no other table references city_distances
+// rows, so removing one can never orphan a booking or route.
+async function deleteDistance(req, res) {
+  try {
+    const result = await pool.query(`DELETE FROM city_distances WHERE id = $1 RETURNING *`, [req.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Distance not found' });
+    res.json({ message: 'Distance deleted' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete distance' });
+  }
+}
+
+module.exports = { getAllDistances, upsertDistance, deleteDistance };

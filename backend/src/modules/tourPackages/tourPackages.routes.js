@@ -1,13 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { listPackages, getPackage, postPackage } = require('./tourPackages.controller');
+const {
+  listPackages, listPackagesAdmin, getPackage, getPackageAdmin, postPackage, putPackage, deletePackage,
+} = require('./tourPackages.controller');
 const { requireAuth } = require('../../middleware/auth.middleware');
 
-// Public — browsing packages needs no login
 router.get('/', listPackages);
+router.get('/admin', requireAuth, listPackagesAdmin);
+router.get('/admin/:id', requireAuth, getPackageAdmin);
 router.get('/:slug', getPackage);
-
-// Admin-only — creating a package
 router.post('/', requireAuth, postPackage);
+router.put('/:id', requireAuth, putPackage);
+router.delete('/:id', requireAuth, deletePackage);
 
 module.exports = router;

@@ -39,38 +39,54 @@ export async function adminLogin(email, password) {
     body: JSON.stringify({ email, password }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data.error || 'Login failed');
-  }
-  return data; // { token, admin }
+  if (!res.ok) throw new Error(data.error || 'Login failed');
+  return data;
 }
 
+// Bookings
 export const getBookings = () => adminFetch('/api/bookings');
 export const confirmBooking = (id) => adminFetch(`/api/bookings/${id}/confirm`, { method: 'POST' });
+export const cancelBooking = (id, reason) =>
+  adminFetch(`/api/bookings/${id}/cancel`, { method: 'POST', body: JSON.stringify({ reason }) });
 export const assignDriver = (id, driverId) =>
-  adminFetch(`/api/bookings/${id}/assign-driver`, {
-    method: 'POST',
-    body: JSON.stringify({ driver_id: driverId }),
-  });
+  adminFetch(`/api/bookings/${id}/assign-driver`, { method: 'POST', body: JSON.stringify({ driver_id: driverId }) });
 
+// Drivers
 export const getDrivers = () => adminFetch('/api/drivers');
-export const createDriver = (payload) =>
-  adminFetch('/api/drivers', { method: 'POST', body: JSON.stringify(payload) });
+export const createDriver = (payload) => adminFetch('/api/drivers', { method: 'POST', body: JSON.stringify(payload) });
+export const updateDriver = (id, payload) => adminFetch(`/api/drivers/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+export const deactivateDriver = (id) => adminFetch(`/api/drivers/${id}`, { method: 'DELETE' });
 
-export const createCity = (payload) =>
-  adminFetch('/api/cities', { method: 'POST', body: JSON.stringify(payload) });
+// Cities
+export const getCitiesAdmin = () => adminFetch('/api/cities/admin');
+export const createCity = (payload) => adminFetch('/api/cities', { method: 'POST', body: JSON.stringify(payload) });
+export const updateCity = (id, payload) => adminFetch(`/api/cities/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+export const deactivateCity = (id) => adminFetch(`/api/cities/${id}`, { method: 'DELETE' });
 
-export const createVehicleType = (payload) =>
-  adminFetch('/api/vehicle-types', { method: 'POST', body: JSON.stringify(payload) });
+// Vehicle Types
+export const getVehicleTypesAdmin = () => adminFetch('/api/vehicle-types/admin');
+export const createVehicleType = (payload) => adminFetch('/api/vehicle-types', { method: 'POST', body: JSON.stringify(payload) });
+export const updateVehicleType = (id, payload) => adminFetch(`/api/vehicle-types/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+export const deactivateVehicleType = (id) => adminFetch(`/api/vehicle-types/${id}`, { method: 'DELETE' });
 
-export const createTripRoute = (payload) =>
-  adminFetch('/api/trip-routes', { method: 'POST', body: JSON.stringify(payload) });
+// Trip Routes
+export const getTripRoutesAdmin = () => adminFetch('/api/trip-routes/admin');
+export const createTripRoute = (payload) => adminFetch('/api/trip-routes', { method: 'POST', body: JSON.stringify(payload) });
+export const updateTripRoute = (id, payload) => adminFetch(`/api/trip-routes/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+export const deactivateTripRoute = (id) => adminFetch(`/api/trip-routes/${id}`, { method: 'DELETE' });
 
+// Enquiries
 export const getEnquiries = () => adminFetch('/api/enquiries');
+export const deleteEnquiry = (id) => adminFetch(`/api/enquiries/${id}`, { method: 'DELETE' });
 
-export const createTourPackage = (payload) =>
-  adminFetch('/api/tour-packages', { method: 'POST', body: JSON.stringify(payload) });
+// Tour Packages
+export const getTourPackagesAdmin = () => adminFetch('/api/tour-packages/admin');
+export const getTourPackageAdmin = (id) => adminFetch(`/api/tour-packages/admin/${id}`);
+export const createTourPackage = (payload) => adminFetch('/api/tour-packages', { method: 'POST', body: JSON.stringify(payload) });
+export const updateTourPackage = (id, payload) => adminFetch(`/api/tour-packages/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+export const deactivateTourPackage = (id) => adminFetch(`/api/tour-packages/${id}`, { method: 'DELETE' });
 
+// City Distances
 export const getCityDistances = () => adminFetch('/api/city-distances');
-export const upsertCityDistance = (payload) =>
-  adminFetch('/api/city-distances', { method: 'POST', body: JSON.stringify(payload) });
+export const upsertCityDistance = (payload) => adminFetch('/api/city-distances', { method: 'POST', body: JSON.stringify(payload) });
+export const deleteCityDistance = (id) => adminFetch(`/api/city-distances/${id}`, { method: 'DELETE' });

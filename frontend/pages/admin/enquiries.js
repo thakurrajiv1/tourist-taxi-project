@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { useRequireAuth } from '../../lib/useRequireAuth';
-import { getEnquiries, UnauthorizedError } from '../../lib/adminApi';
+import { getEnquiries, deleteEnquiry, UnauthorizedError } from '../../lib/adminApi';
 import { buildWhatsAppLink } from '../../lib/whatsapp';
 
 const th = { padding: '10px 14px', fontWeight: 600, color: 'var(--color-text-muted)', fontSize: 13 };
@@ -15,28 +15,36 @@ export default function AdminEnquiriesPage() {
   const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [rowBusyId, setRowBusyId] = useState(null);
 
   async function loadData() {
     setLoading(true);
     setError('');
     try {
-      const data = await getEnquiries();
-      setEnquiries(data);
+      setEnquiries(await getEnquiries());
     } catch (err) {
-      if (err instanceof UnauthorizedError) {
-        router.replace('/admin/login');
-        return;
-      }
+      if (err instanceof UnauthorizedError) { router.replace('/admin/login'); return; }
       setError(err.message);
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => {
-    if (ready) loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready]);
+  useEffect(() => { if (ready) loadData(); }, [ready]);
+
+  async function handleDelete(eq) {
+    if (!window.confirm(`Delete the enquiry from ${eq.name}? This can't be undone.`)) return;
+    setRowBusyId(eq.id);
+    try {
+      await deleteEnquiry(eq.id);
+      loadData();
+    } catch (err) {
+      if (err instanceof UnauthorizedError) { router.replace('/admin/login'); return; }
+      setError(err.message);
+    } finally {
+      setRowBusyId(null);
+    }
+  }
 
   if (!ready) return null;
 
@@ -44,11 +52,7 @@ export default function AdminEnquiriesPage() {
     <AdminLayout title="Enquiries">
       <div className="card" style={{ overflowX: 'auto', padding: 0 }}>
         {loading && <p style={{ padding: 16 }}>Loading…</p>}
-        {error && (
-          <div className="error-banner" style={{ margin: 16 }}>
-            {error}
-          </div>
-        )}
+        {error && <div className="error-banner" style={{ margin: 16 }}>{error}</div>}
         {!loading && !error && (
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
             <thead>
@@ -58,7 +62,7 @@ export default function AdminEnquiriesPage() {
                 <th style={th}>Message</th>
                 <th style={th}>Page</th>
                 <th style={th}>Received</th>
-                <th style={th}>Action</th>
+                <th style={th}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -70,25 +74,29 @@ export default function AdminEnquiriesPage() {
                   <td style={td}>{eq.source_page || '—'}</td>
                   <td style={td}>{new Date(eq.created_at).toLocaleString('en-IN')}</td>
                   <td style={td}>
-                    <a
-                      href={buildWhatsAppLink(`Hi ${eq.name}, thanks for reaching out to Roaming Route!`)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-secondary"
-                      style={{ padding: '6px 12px', fontSize: 12 }}
-                    >
-                      Reply on WhatsApp
-                    </a>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <a
+                        href={buildWhatsAppLink(`Hi ${eq.name}, thanks for reaching out to Roaming Route!`)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-secondary"
+                        style={{ padding: '5px 10px', fontSize: 12 }}
+                      >
+                        Reply
+                      </a>
+                      <button
+                        className="btn"
+                        style={{ padding: '5px 10px', fontSize: 12, background: '#fdecea', color: 'var(--color-error)' }}
+                        onClick={() => handleDelete(eq)}
+                        disabled={rowBusyId === eq.id}
+                      >
+                        {rowBusyId === eq.id ? '…' : 'Delete'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
-              {enquiries.length === 0 && (
-                <tr>
-                  <td style={td} colSpan={6}>
-                    No enquiries yet.
-                  </td>
-                </tr>
-              )}
+              {enquiries.length === 0 && <tr><td style={td} colSpan={6}>No enquiries yet.</td></tr>}
             </tbody>
           </table>
         )}

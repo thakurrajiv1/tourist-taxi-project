@@ -6,15 +6,8 @@ import { getFareQuote, getCustomFareQuote, createBooking, createPaymentOrder } f
 export default function BookingPage() {
   const router = useRouter();
   const {
-    mode,
-    from_city_id,
-    to_city_id,
-    from_address,
-    to_address,
-    vehicle_type_id,
-    trip_type,
-    pickup_date,
-    return_date,
+    mode, from_city_id, to_city_id, from_address, to_address,
+    vehicle_type_id, trip_type, pickup_date, return_date,
   } = router.query;
 
   const isCustom = mode === 'custom';
@@ -38,7 +31,6 @@ export default function BookingPage() {
 
   useEffect(() => {
     if (!router.isReady) return;
-
     const hasRequiredFields = isCustom
       ? from_address && to_address && vehicle_type_id && trip_type && pickup_date
       : from_city_id && to_city_id && vehicle_type_id && trip_type && pickup_date;
@@ -50,14 +42,10 @@ export default function BookingPage() {
     }
 
     const quoteFn = isCustom ? getCustomFareQuote : getFareQuote;
-
     quoteFn(searchParams)
       .then((q) => {
-        if (q.maps_enabled === false) {
-          setQuoteError(q.message);
-        } else {
-          setQuote(q);
-        }
+        if (q.maps_enabled === false) setQuoteError(q.message);
+        else setQuote(q);
         setQuoteLoading(false);
       })
       .catch((err) => {
@@ -70,27 +58,16 @@ export default function BookingPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitError('');
-
-    if (!name.trim() || !phone.trim()) {
-      setSubmitError('Name and phone number are required.');
-      return;
-    }
+    if (!name.trim() || !phone.trim()) { setSubmitError('Name and phone number are required.'); return; }
 
     setSubmitting(true);
     try {
       const bookingResult = await createBooking({
-        ...searchParams,
-        customer_name: name,
-        customer_phone: phone,
-        customer_email: email || undefined,
-        payment_preference: paymentPreference,
+        ...searchParams, customer_name: name, customer_phone: phone,
+        customer_email: email || undefined, payment_preference: paymentPreference,
       });
-
       let paymentInfo = null;
-      if (bookingResult.payment_required) {
-        paymentInfo = await createPaymentOrder(bookingResult.booking.id);
-      }
-
+      if (bookingResult.payment_required) paymentInfo = await createPaymentOrder(bookingResult.booking.id);
       setResult({ ...bookingResult, paymentInfo });
     } catch (err) {
       setSubmitError(err.message);
@@ -102,9 +79,7 @@ export default function BookingPage() {
   if (quoteLoading) {
     return (
       <Layout title="Booking">
-        <div className="container" style={{ paddingTop: 40 }}>
-          <p>Loading your fare…</p>
-        </div>
+        <div className="container" style={{ paddingTop: 40 }}><p>Loading your fare…</p></div>
       </Layout>
     );
   }
@@ -114,28 +89,34 @@ export default function BookingPage() {
       <Layout title="Booking">
         <div className="container" style={{ paddingTop: 40 }}>
           <div className="error-banner">{quoteError}</div>
-          <a href="/" className="btn btn-secondary" style={{ marginTop: 12 }}>
-            Back to Search
-          </a>
+          <a href="/" className="btn btn-secondary" style={{ marginTop: 12 }}>Back to Search</a>
         </div>
       </Layout>
     );
   }
 
-  // Confirmation view, shown after a successful booking
   if (result) {
     const { booking, paymentInfo } = result;
+    const trackUrl = `/track?ref=${booking.booking_reference}`;
     return (
       <Layout title="Booking Confirmed">
         <div className="container" style={{ paddingTop: 40, maxWidth: 560 }}>
           <div className="card">
-            <div className="success-banner">
-              Booking received! Reference #{booking.id}
+            <div className="success-banner">Booking received!</div>
+
+            <div style={{ background: 'var(--color-bg)', borderRadius: 10, padding: 16, marginBottom: 16, textAlign: 'center' }}>
+              <div className="eyebrow" style={{ marginBottom: 4 }}>Your Booking Reference</div>
+              <div className="mono" style={{ fontSize: 22, fontWeight: 700, color: 'var(--color-primary)', letterSpacing: 1 }}>
+                {booking.booking_reference}
+              </div>
+              <p style={{ fontSize: 12, color: 'var(--color-text-muted)', margin: '6px 0 0' }}>
+                {email ? 'We\'ve also emailed this to you — ' : ''}save this to track your booking anytime.
+              </p>
             </div>
+
             <h2 style={{ fontSize: 20 }}>Trip Summary</h2>
             <p style={{ color: 'var(--color-text-muted)', fontSize: 14 }}>
-              Fare: <strong>₹{parseFloat(booking.quoted_fare).toLocaleString('en-IN')}</strong>
-              <br />
+              Fare: <strong>₹{parseFloat(booking.quoted_fare).toLocaleString('en-IN')}</strong><br />
               Status: <strong>{booking.booking_status}</strong>
             </p>
 
@@ -144,30 +125,25 @@ export default function BookingPage() {
                 {paymentInfo.message}
               </div>
             )}
-
             {paymentInfo && paymentInfo.payment_gateway_enabled && (
               <p style={{ fontSize: 14 }}>
-                An advance of ₹{paymentInfo.amount} is due. Payment checkout would open here once
-                connected to the Razorpay widget.
+                An advance of ₹{paymentInfo.amount} is due. Payment checkout would open here once connected to the Razorpay widget.
               </p>
             )}
-
             {!paymentInfo && (
               <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>
                 Our team will contact you at {phone} shortly to confirm your trip.
               </p>
             )}
 
-            <a href="/" className="btn btn-secondary" style={{ marginTop: 12 }}>
-              Back to Home
-            </a>
+            <a href={trackUrl} className="btn btn-primary btn-block" style={{ marginTop: 12 }}>Track This Booking</a>
+            <a href="/" className="btn btn-secondary btn-block" style={{ marginTop: 8 }}>Back to Home</a>
           </div>
         </div>
       </Layout>
     );
   }
 
-  // Booking form view
   return (
     <Layout title="Complete Your Booking">
       <div className="container" style={{ paddingTop: 40, maxWidth: 560 }}>
@@ -175,8 +151,7 @@ export default function BookingPage() {
 
         {isCustom && quote && (quote.from_resolved || quote.to_resolved) && (
           <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginTop: -8, marginBottom: 12 }}>
-            Matched to: {quote.from_resolved} → {quote.to_resolved}. Not right? Go back and refine
-            your search.
+            Matched to: {quote.from_resolved} → {quote.to_resolved}. Not right? Go back and refine your search.
           </p>
         )}
 
@@ -196,40 +171,23 @@ export default function BookingPage() {
             <label htmlFor="name">Full Name</label>
             <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
-
           <div className="field">
             <label htmlFor="phone">Phone Number</label>
-            <input
-              id="phone"
-              type="tel"
-              placeholder="10-digit mobile number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
+            <input id="phone" type="tel" placeholder="10-digit mobile number" value={phone} onChange={(e) => setPhone(e.target.value)} />
           </div>
-
           <div className="field">
-            <label htmlFor="email">Email (optional)</label>
-            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <label htmlFor="email">Email — for booking updates &amp; tracking link</label>
+            <input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
-
           <div className="field">
             <label>Payment Preference</label>
             <div style={{ display: 'flex', gap: 16, fontSize: 14 }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <input
-                  type="radio"
-                  checked={paymentPreference === 'pay_later'}
-                  onChange={() => setPaymentPreference('pay_later')}
-                />
+                <input type="radio" checked={paymentPreference === 'pay_later'} onChange={() => setPaymentPreference('pay_later')} />
                 Pay Later
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <input
-                  type="radio"
-                  checked={paymentPreference === 'pay_now'}
-                  onChange={() => setPaymentPreference('pay_now')}
-                />
+                <input type="radio" checked={paymentPreference === 'pay_now'} onChange={() => setPaymentPreference('pay_now')} />
                 Pay Now
               </label>
             </div>

@@ -2,6 +2,7 @@ const {
   validateBookingInput,
   createBooking,
   getBookingById,
+  getBookingByReference,
   getAllBookings,
   confirmBooking,
   cancelBooking,
@@ -31,6 +32,23 @@ async function getBooking(req, res) {
   }
 }
 
+/**
+ * Public — the whole point of the reference token is that anyone who has
+ * it (the customer, because we emailed it to them) can check status
+ * without logging in. Its unguessability is the security boundary here,
+ * same as e.g. a shipment tracking number.
+ */
+async function trackBooking(req, res) {
+  try {
+    const booking = await getBookingByReference(req.params.reference);
+    if (!booking) return res.status(404).json({ error: 'No booking found for that reference. Double-check the code from your confirmation email.' });
+    res.json(booking);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch booking status' });
+  }
+}
+
 async function listBookings(req, res) {
   try {
     res.json(await getAllBookings());
@@ -51,8 +69,7 @@ async function postConfirmBooking(req, res) {
 
 async function postCancelBooking(req, res) {
   try {
-    const booking = await cancelBooking(req.params.id, req.body.reason);
-    res.json(booking);
+    res.json(await cancelBooking(req.params.id, req.body.reason));
   } catch (err) {
     console.error(err);
     res.status(err.statusCode || 500).json({ error: err.message });
@@ -70,4 +87,6 @@ async function postAssignDriver(req, res) {
   }
 }
 
-module.exports = { postBooking, getBooking, listBookings, postConfirmBooking, postCancelBooking, postAssignDriver };
+module.exports = {
+  postBooking, getBooking, trackBooking, listBookings, postConfirmBooking, postCancelBooking, postAssignDriver,
+};

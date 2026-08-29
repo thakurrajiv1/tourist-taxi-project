@@ -18,6 +18,11 @@ function getTransporter() {
       port: SMTP_PORT,
       secure: SMTP_SECURE, // true for 465 (SSL), false for 587 (STARTTLS)
       auth: { user: SMTP_USER, pass: SMTP_PASSWORD },
+      // Render's network can't route outbound IPv6, and Node sometimes
+      // resolves smtp.hostinger.com to an IPv6 address first, causing
+      // ENETUNREACH. Forcing IPv4 avoids that entirely — safe everywhere,
+      // no downside on platforms where IPv6 works fine too.
+      family: 4,
     });
   }
   return transporter;

@@ -1,31 +1,30 @@
 require('dotenv').config();
 
-// Hostinger's SMTP hostname is universal (not per-domain) — smtp.hostinger.com
-// on port 465 with SSL, authenticated with the full mailbox address and
-// its password. Confirmed against Hostinger's current documentation.
-const SMTP_HOST = process.env.SMTP_HOST || 'smtp.hostinger.com';
-const SMTP_PORT = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 465;
-const SMTP_SECURE = SMTP_PORT === 465; // true = SSL (465), false = STARTTLS (587)
-const SMTP_USER = process.env.SMTP_USER || null; // e.g. contactus@roamingroute.in
-const SMTP_PASSWORD = process.env.SMTP_PASSWORD || null;
+// Render's free tier blocks all outbound SMTP ports (25, 465, 587) —
+// confirmed directly in Render's own docs, not fixable with DNS/IPv4
+// tuning. Resend sends over a normal HTTPS API call instead, which is
+// never blocked on any hosting tier.
+const RESEND_API_KEY = process.env.RESEND_API_KEY || null;
 
+// Must be an address on a domain you've verified in the Resend
+// dashboard (Settings > Domains) — Resend rejects sends from
+// unverified domains.
+const FROM_EMAIL = process.env.FROM_EMAIL || 'contactus@roamingroute.in';
 const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'Roaming Route Travel and Transport';
-// Where new-booking notifications go — defaults to the sending mailbox
-// itself if not set separately.
-const ADMIN_NOTIFICATION_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || SMTP_USER;
 
-// Email notifications stay inactive until both credentials are set — see
+// Where new-booking notifications go — defaults to the sending address
+// itself if not set separately.
+const ADMIN_NOTIFICATION_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || FROM_EMAIL;
+
+// Email notifications stay inactive until the API key is set — see
 // email.service.js for the graceful "log and skip" behavior while off,
 // same dormant-until-configured pattern as Razorpay, Mapbox, and Google
 // Reviews.
-const isEmailEnabled = Boolean(SMTP_USER && SMTP_PASSWORD);
+const isEmailEnabled = Boolean(RESEND_API_KEY);
 
 module.exports = {
-  SMTP_HOST,
-  SMTP_PORT,
-  SMTP_SECURE,
-  SMTP_USER,
-  SMTP_PASSWORD,
+  RESEND_API_KEY,
+  FROM_EMAIL,
   EMAIL_FROM_NAME,
   ADMIN_NOTIFICATION_EMAIL,
   isEmailEnabled,

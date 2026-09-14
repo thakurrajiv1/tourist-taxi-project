@@ -16,6 +16,8 @@ const tourPackagesRoutes = require('./modules/tourPackages/tourPackages.routes')
 const cityDistancesRoutes = require('./modules/cityDistances/cityDistances.routes');
 const reviewsRoutes = require('./modules/reviews/reviews.routes');
 const { generalLimiter } = require('./middleware/rateLimit');
+const uploadsRoutes = require('./modules/uploads/uploads.routes');
+
 
 const app = express();
 
@@ -96,6 +98,7 @@ app.use('/api/enquiries', enquiriesRoutes);
 app.use('/api/tour-packages', tourPackagesRoutes);
 app.use('/api/city-distances', cityDistancesRoutes);
 app.use('/api/reviews', reviewsRoutes);
+app.use('/api/uploads', uploadsRoutes);
 
 // Fallback 404
 app.use((req, res) => {

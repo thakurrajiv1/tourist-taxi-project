@@ -22,13 +22,10 @@ async function adminFetch(path, options = {}) {
     clearToken();
     throw new UnauthorizedError(data.error || 'Session expired, please log in again');
   }
-
   if (!res.ok) {
-    const message =
-      data.error || (Array.isArray(data.errors) ? data.errors.join(', ') : 'Request failed');
+    const message = data.error || (Array.isArray(data.errors) ? data.errors.join(', ') : 'Request failed');
     throw new Error(message);
   }
-
   return data;
 }
 
@@ -46,10 +43,8 @@ export async function adminLogin(email, password) {
 // Bookings
 export const getBookings = () => adminFetch('/api/bookings');
 export const confirmBooking = (id) => adminFetch(`/api/bookings/${id}/confirm`, { method: 'POST' });
-export const cancelBooking = (id, reason) =>
-  adminFetch(`/api/bookings/${id}/cancel`, { method: 'POST', body: JSON.stringify({ reason }) });
-export const assignDriver = (id, driverId) =>
-  adminFetch(`/api/bookings/${id}/assign-driver`, { method: 'POST', body: JSON.stringify({ driver_id: driverId }) });
+export const cancelBooking = (id, reason) => adminFetch(`/api/bookings/${id}/cancel`, { method: 'POST', body: JSON.stringify({ reason }) });
+export const assignDriver = (id, driverId) => adminFetch(`/api/bookings/${id}/assign-driver`, { method: 'POST', body: JSON.stringify({ driver_id: driverId }) });
 
 // Drivers
 export const getDrivers = () => adminFetch('/api/drivers');
@@ -90,3 +85,34 @@ export const deactivateTourPackage = (id) => adminFetch(`/api/tour-packages/${id
 export const getCityDistances = () => adminFetch('/api/city-distances');
 export const upsertCityDistance = (payload) => adminFetch('/api/city-distances', { method: 'POST', body: JSON.stringify(payload) });
 export const deleteCityDistance = (id) => adminFetch(`/api/city-distances/${id}`, { method: 'DELETE' });
+
+/**
+ * Image uploads use multipart/form-data, not JSON, so this bypasses the
+ * adminFetch() JSON helper and builds the request directly — still
+ * attaches the same admin auth token, and normalizes errors the same way.
+ */
+export async function uploadImage(file) {
+  const token = getToken();
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const res = await fetch(`${API_BASE_URL}/api/uploads/image`, {
+    method: 'POST',
+    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    // No Content-Type header here — the browser sets the correct
+    // multipart/form-data boundary automatically, which breaks if you
+    // set it manually.
+    body: formData,
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (res.status === 401) {
+    clearToken();
+    throw new UnauthorizedError(data.error || 'Session expired, please log in again');
+  }
+  if (!res.ok) {
+    throw new Error(data.error || 'Image upload failed');
+  }
+  return data; // { url }
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import AdminLayout from '../../components/admin/AdminLayout';
+import ImageUploadField from '../../components/admin/ImageUploadField';
 import { useRequireAuth } from '../../lib/useRequireAuth';
 import {
   getTourPackagesAdmin, getTourPackageAdmin, createTourPackage, updateTourPackage, deactivateTourPackage,
@@ -181,10 +182,16 @@ export default function AdminTourPackagesPage() {
             <label htmlFor="pprice">Price (₹)</label>
             <input id="pprice" type="number" step="0.01" value={form.price} onChange={(e) => setField('price', e.target.value)} />
           </div>
+
+          {/* Real upload button — replaces the old "type a file path"
+              workflow. The URL field below still works too, for anyone
+              who already has an image hosted elsewhere. */}
+          <ImageUploadField value={form.coverImageUrl} onUploaded={(url) => setField('coverImageUrl', url)} />
           <div className="field">
-            <label htmlFor="pimg">Cover Image URL (optional)</label>
-            <input id="pimg" placeholder="/images/packages/golden-triangle.jpg" value={form.coverImageUrl} onChange={(e) => setField('coverImageUrl', e.target.value)} />
+            <label htmlFor="pimg">Or paste an Image URL directly</label>
+            <input id="pimg" placeholder="https://..." value={form.coverImageUrl} onChange={(e) => setField('coverImageUrl', e.target.value)} />
           </div>
+
           <div className="field">
             <label htmlFor="pinc">Inclusions (comma-separated)</label>
             <input id="pinc" placeholder="Hotel stay, Breakfast, All transfers" value={form.inclusionsText} onChange={(e) => setField('inclusionsText', e.target.value)} />
